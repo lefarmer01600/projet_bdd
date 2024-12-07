@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi des Commandes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Gestion des Produits et Commandes</h1>
+        <div id="accountInfo">
+            <p>Bienvenue, <span id="username">Utilisateur</span></p>
+        </div>
+    </header>
+    
+    <section id="productSection">
+        <h2>Produits Disponibles</h2>
+        <div id="productList"></div>
+    </section>
+    
+    <section id="orderSection">
+        <h2>Passer une commande</h2>
+        <label for="productSelect">Choisissez un produit :</label>
+        <select id="productSelect"></select>
+        <button onclick="addToCart()">Ajouter au panier</button>
+        
+        <h3>Panier</h3>
+        <ul id="cart"></ul>
+        
+        <button onclick="placeOrder()">Passer la commande</button>
+    </section>
+    
+    <section id="orderManagement">
+        <h2>Gérer les Commandes</h2>
+        <div id="orderList"></div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
