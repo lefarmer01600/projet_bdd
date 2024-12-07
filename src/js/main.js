@@ -1,4 +1,3 @@
-// Simuler l'appel aux APIs PHP via AJAX
 document.addEventListener('DOMContentLoaded', function() {
     loadProducts();
     loadOrders();
@@ -16,7 +15,7 @@ function loadProducts() {
             data.forEach(product => {
                 let option = document.createElement('option');
                 option.value = product.IdProduit;
-                option.textContent = product.Libellé + ' - €' + product.Prix;
+                option.textContent = `${product.Libellé} - €${product.Prix}`;
                 productSelect.appendChild(option);
 
                 let productDiv = document.createElement('div');
@@ -33,14 +32,18 @@ function addToCart() {
     const productSelect = document.getElementById('productSelect');
     const selectedProductId = productSelect.value;
 
-    fetch('getProduct.php?id=' + selectedProductId)
-        .then(response => response.json())
-        .then(data => {
-            const product = data[0];
-            cart.push(product);
-            updateCart();
-        })
-        .catch(error => console.error('Error adding to cart:', error));
+    if (selectedProductId) {
+        fetch(`getProduct.php?id=${selectedProductId}`)
+            .then(response => response.json())
+            .then(data => {
+                const product = data[0];
+                cart.push(product);
+                updateCart();
+            })
+            .catch(error => console.error('Error adding to cart:', error));
+    } else {
+        alert('Veuillez sélectionner un produit.');
+    }
 }
 
 function updateCart() {
@@ -49,33 +52,39 @@ function updateCart() {
     
     cart.forEach(item => {
         const li = document.createElement('li');
-        li.textContent = item.Libellé + ' - €' + item.Prix;
+        li.textContent = `${item.Libellé} - €${item.Prix}`;
         cartList.appendChild(li);
     });
 }
 
 function placeOrder() {
     const orderDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    const clientId = 1; // Simuler un ID de client
-    fetch('addCommande.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            date: orderDate,
-            idClient: clientId,
-            cart: cart.map(item => item.IdProduit),
+    const clientId = 1; // ID fictif
+    const cartProducts = cart.map(item => item.IdProduit);
+
+    if (cartProducts.length > 0) {
+        fetch('addCommande.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                date: orderDate,
+                idClient: clientId,
+                cart: cartProducts,
+            })
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert('Commande passée avec succès !');
-        cart = [];
-        updateCart();
-        loadOrders();
-    })
-    .catch(error => console.error('Error placing order:', error));
+        .then(response => response.json())
+        .then(data => {
+            alert('Commande passée avec succès !');
+            cart = [];
+            updateCart();
+            loadOrders();
+        })
+        .catch(error => console.error('Error placing order:', error));
+    } else {
+        alert('Votre panier est vide.');
+    }
 }
 
 function loadOrders() {
