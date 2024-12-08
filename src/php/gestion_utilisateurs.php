@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_user'])) {
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hachage du mot de passe
     $adresse_facturation = $_POST['adresse_facturation'];
     $telephone = $_POST['telephone'];
-    $id_role = $_POST['id_role']; // Par exemple, 1 pour Admin, 2 pour Client, etc.
+    $id_role = $_POST['id_role'];
 
     $stmt = $con->prepare("INSERT INTO utilisateur (Username, Password, Adresse_Facturation, telephone, IdRole) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([$username, $password, $adresse_facturation, $telephone, $id_role]);
