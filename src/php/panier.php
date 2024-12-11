@@ -6,47 +6,6 @@ require 'db.php';
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
-
-// Gestion des actions (ajout, suppression, mise à jour)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        $action = $_POST['action'];
-        $productId = intval($_POST['idProduit']);
-        $quantity = intval($_POST['quantite'] ?? 1);
-
-        switch ($action) {
-            case 'add':
-                if (isset($_SESSION['cart'][$productId])) {
-                    $_SESSION['cart'][$productId]['quantite'] += $quantity;
-                } else {
-                    $_SESSION['cart'][$productId] = [
-                        'idProduit' => $productId,
-                        'quantite' => $quantity
-                    ];
-                }
-                break;
-
-            case 'update':
-                if (isset($_SESSION['cart'][$productId])) {
-                    $_SESSION['cart'][$productId]['quantite'] = max(1, $quantity); // Minimum 1
-                }
-                break;
-
-            case 'remove':
-                if (isset($_SESSION['cart'][$productId])) {
-                    unset($_SESSION['cart'][$productId]);
-                }
-                break;
-
-            case 'clear':
-                $_SESSION['cart'] = [];
-                break;
-        }
-    }
-    header("Location: panier.php");
-    exit;
-}
-
 // Récupération des produits du panier
 $cart = $_SESSION['cart'];
 $total = 0;
@@ -65,47 +24,74 @@ if (!empty($cart)) {
     $products = $stmt->fetchAll();
 }
 
-// Logique pour la commande
-// if (isset($_POST['action']) && $_POST['action'] === 'commander') {
-//     // Vérifier si l'utilisateur est connecté
-//     $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-//     if ($userId) {
-//         // Créer la chaîne de produits pour la procédure
-//         $productsStr = '';
-//         foreach ($cart as $product) {
-//             $productsStr .= $product['idProduit'] . ':' . $product['quantite'] . ',';
-//         }
-//         $productsStr = rtrim($productsStr, ',');
+// Gestion des actions (ajout, suppression, mise à jour)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['action'])) {
+        $action = $_POST['action'];
 
-//         // Préparer et exécuter la procédure de commande
-//         try {
-//             $stmt = $con->prepare("CALL passerCommande(:status, :deliveryDate, :userId, :products)");
-//             $stmt->bindParam(':status', $status);
-//             $stmt->bindParam(':deliveryDate', $deliveryDate);
-//             $stmt->bindParam(':userId', $userId);
-//             $stmt->bindParam(':products', $productsStr);
+        switch ($action) {
+            case 'add':
+                $productId = intval($_POST['idProduit']);
+                $quantity = intval($_POST['quantite'] ?? 1);
+                if (isset($_SESSION['cart'][$productId])) {
+                    $_SESSION['cart'][$productId]['quantite'] += $quantity;
+                } else {
+                    $_SESSION['cart'][$productId] = [
+                        'idProduit' => $productId,
+                        'quantite' => $quantity
+                    ];
+                }
+                break;
 
-//             // Définir les valeurs des paramètres
-//             $status = 'En cours'; //
-//             $deliveryDate = '2024-12-20';
+            case 'update':
+                $productId = intval($_POST['idProduit']);
+                $quantity = intval($_POST['quantite'] ?? 1);
+                if (isset($_SESSION['cart'][$productId])) {
+                    $_SESSION['cart'][$productId]['quantite'] = max(1, $quantity); // Minimum 1
+                }
+                break;
 
-//             // Exécuter la procédure stockée
-//             $stmt->execute();
+            case 'remove':
+                $productId = intval($_POST['idProduit']);
+                if (isset($_SESSION['cart'][$productId])) {
+                    unset($_SESSION['cart'][$productId]);
+                }
+                break;
 
-//             // Vider le panier après la commande
-//             $_SESSION['cart'] = [];
+            case 'clear':
+                $_SESSION['cart'] = [];
+                echo ("Panier vidé");
+                break;
+            case 'commander':
+                // Logic de commande
+                if (!empty($products)) {
+                    $idUtilisateur = 1;
+                    $produits = [];
+                    $status = 'En attente';
+                    $date = date('Y-m-d H:i:s', strtotime('+7 days')); // Ensure datetime format
+                    foreach ($products as $product) {
+                        $produits[] = $product['Id'] . ':' . $cart[$product['Id']]['quantite'];
+                    }
+                    $produits = implode(',', $produits);
 
-//             // Redirige après la commande
-//             header("Location: confirmation.php");
-//             exit;
-//         } catch (PDOException $e) {
-//             echo "Erreur lors de la commande : " . $e->getMessage();
-//             exit;
-//         }
-//     } else {
-//         echo "Utilisateur non connecté";
-//     }
-// }
+                    $stmt = $con->prepare("CALL passerCommande(:p_Status, :p_DateLivraison, :p_IdUser, :p_Produits)");
+                    $stmt->bindParam(':p_IdUser', $idUtilisateur);
+                    $stmt->bindParam(':p_Status', $status);
+                    $stmt->bindParam(':p_DateLivraison', $date);
+                    $stmt->bindParam(':p_Produits', $produits);
+                    $stmt->execute();
+
+                    $_SESSION['cart'] = [];
+                    $successMessage = "Commande passée avec succès ! Date de livraison estimée : $date";
+                }
+                break;
+        }
+    }
+    header("Location: panier.php");
+    exit;
+}
+
+
 ?>
 
 <!DOCTYPE html>
