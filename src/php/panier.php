@@ -86,8 +86,8 @@ if (!empty($cart)) {
 //             $stmt->bindParam(':products', $productsStr);
 
 //             // Définir les valeurs des paramètres
-//             $status = 'En cours'; // Exemple de statut
-//             $deliveryDate = '2024-12-20'; // Exemple de date de livraison
+//             $status = 'En cours'; //
+//             $deliveryDate = '2024-12-20';
 
 //             // Exécuter la procédure stockée
 //             $stmt->execute();
