@@ -201,3 +201,8 @@ select:focus, input:focus {
     outline: none;
     border-color: #b02331;
 }
+
+.ctn-btn {
+    transform: translateY(-2px);
+    padding: 7.5px 12px;
+}

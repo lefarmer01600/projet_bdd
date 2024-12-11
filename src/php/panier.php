@@ -174,7 +174,7 @@ if (!empty($cart)) {
             <strong>Total : <?= number_format($total, 2); ?> €</strong>
         </div>
         <div class="actions">
-            <a href="index.php" class="btn">Continuer vos achats</a>
+            <a href="index.php" class="btn ctn-btn">Continuer vos achats</a>
             <form method="post" style="display:inline;">
                 <input type="hidden" name="action" value="clear">
                 <button type="submit" class="btn delete-btn">Vider le panier</button>
